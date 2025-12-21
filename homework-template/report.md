@@ -499,8 +499,18 @@ int main() {
 
 ## 效能分析
 
-1. 時間複雜度：程式的時間複雜度為 $O(\log n)$。
-2. 空間複雜度：空間複雜度為 $O(100\times \log n + \pi)$。
+| 功能  | 時間複雜度 | 空間複雜度  |
+|------------------|-----------------------------|-------------------------------|
+| `Chain::PushBack` | O(1) | O(1) |
+| `Chain::Insert(k)` | O(k)，最壞 O(n) | O(1) |
+| `Chain::Release` / 解構子 | O(n) | O(1) |
+| `Polynomial::NewTerm` | O(t) | O(1) |
+| `operator>>`（建立 N 項多項式） | O(N²) | O(N) |
+| `Polynomial::Evaluate` | O(m) | O(1) |
+| `operator+ (A + B)` | O((m + n)²) | O(m + n) |
+| `operator- (A - B)` | O((m + n)²) | O(m + n) |
+| `operator* (A * B)` | O((m · n)²) | O(m · n) |
+
 
 ## 測試與驗證
 
