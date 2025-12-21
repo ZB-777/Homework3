@@ -1,7 +1,5 @@
 # 41343117
 
-作業一
-
 ## 解題說明
 要做出Template與其應用，透過Linked List及Iterator的設計，完成多項式的資料表示與運算。
 1. template <class T>class ChainNode
@@ -17,18 +15,18 @@ Circular List Representation of Polynomials
 ### 解題策略
 
 1. 使用Chainlterator:已更加簡單的方式編利串列，讓串列也可以像平常用int的方法是用for迴圈。
-2.    
-    *it 是回傳 element 這一個屬性，可以當作 (coef, exp)
+   
+    *it 是回傳 element 這一個屬性，可以當作 (coef, exp)。
   
-   it->element->exp 透過 -> 會被簡化為 it->exp
+   it->element->exp 透過 -> 會被簡化為 it->exp。
    
-   it++ 可以當作平常 for 迴圈裡面 i++ 的概念
+   it++ 可以當作平常 for 迴圈裡面 i++ 的概念。
    
-   ++it 跟上面的意思一樣
+   ++it 跟上面的意思一樣。
    
-   != 和 == 就是在檢查 A 節點是否等於或不等於 B 節點
+   != 和 == 就是在檢查 A 節點是否等於或不等於 B 節點。
    
-   node_A - node_B 是在計算兩個節點的間距為多少
+   node_A - node_B 是在計算兩個節點的間距為多少。
    
 2.Available List
 主要是幫助使用者存放節點。
