@@ -1,10 +1,4 @@
-#include <algorithm>
+#include <iomanip>
 #include <cmath>
-#include <cstdio>
-#include <cstring>
-#include <cstdlib>
-#include <fstream>
+#include <stdexcept>
 #include <iostream>
-#include <random>
-#include <sstream>
-#include <string>
