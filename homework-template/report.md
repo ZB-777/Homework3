@@ -16,18 +16,29 @@ Circular List Representation of Polynomials
 
 ### 解題策略
 
-1. 使用Chainlterator:已更加簡單的方式編利串列，讓串列也可以像平常用int的方法是用for迴圈。   
+1. 使用Chainlterator:已更加簡單的方式編利串列，讓串列也可以像平常用int的方法是用for迴圈。
+2.    
     *it 是回傳 element 這一個屬性，可以當作 (coef, exp)
+  
    it->element->exp 透過 -> 會被簡化為 it->exp
+   
    it++ 可以當作平常 for 迴圈裡面 i++ 的概念
+   
    ++it 跟上面的意思一樣
+   
    != 和 == 就是在檢查 A 節點是否等於或不等於 B 節點
+   
    node_A - node_B 是在計算兩個節點的間距為多少
+   
 2.Available List
 主要是幫助使用者存放節點。
+
 讓你先把要刪除的節點存放到 Available List 裡，如果之後要用新節點的話，就不需要再生成額外的節點出來，直接使用 Available List 裡的即可。
+
 getBack 就是把整串的 ChainNode 回收到 AvailableItem 裡。
+
 isEmpty 用來檢查 Available List 是否為空。
+
 getNode 就是把 Available List 裡面的一個節點拿到外面的 poly 串列裡。
   
 ## 程式實作
@@ -540,9 +551,14 @@ A * B = 10X^4 + X^3 + 13X^2 - 8X
 
 ### 結論
 
-1. 程式能正確計算 $n$ 到 $1$ 的連加總和。  
-2. 在 $n < 0$ 的情況下，程式會成功拋出異常，符合設計預期。  
-3. 測試案例涵蓋了多種邊界情況（$n = 0$、$n = 1$、$n > 1$、$n < 0$），驗證程式的正確性。
+1.鏈結串列不是萬能
+ 插入方便，但一直從頭找會很慢
+
+2.設計比語法重要
+ 同一個功能，NewTerm 怎麼寫，效能可以差到好幾倍
+ 
+3.Available List 是效能優化的概念
+不是每次 new/delete，而是「回收再利用」
 
 ## 申論及開發報告
 
