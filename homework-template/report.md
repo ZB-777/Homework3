@@ -3,17 +3,33 @@
 作業一
 
 ## 解題說明
-
-時做一個戴header節點的環狀鏈結串列，每個節點都含有(coef,exp,link)資料。
-每個多項事都要有一個header節點，為了更有效率的
+要做出Template與其應用，透過Linked List及Iterator的設計，完成多項式的資料表示與運算。
+1. template <class T>class ChainNode
+2. template<class T>class Chain
+3. template<class T> class ChainIterator
+Chain<int>::iterator xHere = x.Begin();
+Chain<int>::iterator xEnd = x.End();
+4. template <class T>class Polynomial
+Polynomial Representation
+Circular List Representation of Polynomials
+5. Available Lists 
 
 ### 解題策略
 
-1. 使用遞迴函式將問題拆解為更小的子問題：
-   $$\Sigma(n) = n + \Sigma(n-1)$$
-2. 當 $n \leq 1$ 時，返回 $n$ 作為遞迴的結束條件。  
-3. 主程式呼叫遞迴函式，並輸出計算結果。
-
+1. 使用Chainlterator:已更加簡單的方式編利串列，讓串列也可以像平常用int的方法是用for迴圈。   
+    *it 是回傳 element 這一個屬性，可以當作 (coef, exp)
+   it->element->exp 透過 -> 會被簡化為 it->exp
+   it++ 可以當作平常 for 迴圈裡面 i++ 的概念
+   ++it 跟上面的意思一樣
+   != 和 == 就是在檢查 A 節點是否等於或不等於 B 節點
+   node_A - node_B 是在計算兩個節點的間距為多少
+2.Available List
+主要是幫助使用者存放節點。
+讓你先把要刪除的節點存放到 Available List 裡，如果之後要用新節點的話，就不需要再生成額外的節點出來，直接使用 Available List 裡的即可。
+getBack 就是把整串的 ChainNode 回收到 AvailableItem 裡。
+isEmpty 用來檢查 Available List 是否為空。
+getNode 就是把 Available List 裡面的一個節點拿到外面的 poly 串列裡。
+  
 ## 程式實作
 
 以下為主要程式碼：
