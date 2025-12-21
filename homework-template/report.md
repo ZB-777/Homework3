@@ -527,10 +527,15 @@ int main() {
 
 ### 編譯與執行指令
 
-```shell
-$ g++ -std=c++17 -o sigma sigma.cpp
-$ ./sigma
-6
+
+```bash
+g++ --std=c++17 -o polynomial polynomial.cpp
+./polynomial
+A = 5X^2 + 3X + 8
+B = 2X^2 - X
+A + B = 7X^2 + 2X + 8
+A - B = 3X^2 + 4X + 8
+A * B = 10X^4 + X^3 + 13X^2 - 8X
 ```
 
 ### 結論
