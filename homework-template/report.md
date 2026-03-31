@@ -1,55 +1,26 @@
 # 41343117
-
 ## 解題說明
-要做出Template與其應用，透過Linked List及Iterator的設計，完成多項式的資料表示與運算。
-1. template <class T>class ChainNode
-2. template<class T>class Chain
-3. template<class T> class ChainIterator
-Chain<int>::iterator xHere = x.Begin();
-Chain<int>::iterator xEnd = x.End();
-4. template <class T>class Polynomial
-Polynomial Representation
-Circular List Representation of Polynomials
-5. Available Lists 
+這次作業主要是在做一個「多項式運算系統」，只是老師要求要用 Linked List 來做，而不是用陣列。
+一開始我先做出基本的鏈結串列結構，像是 ChainNode 跟 Chain，讓資料可以一個一個串起來。然後我也做了 Iterator，讓我在操作這個串列的時候，可以像在用陣列一樣用 for 迴圈跑，這樣寫起來比較順。
+接下來是多項式的部分，我把每一項（像 5X² 這種）存成一個節點，裡面會有係數跟次方。然後整個多項式就是一串節點組起來，而且我有讓它按照次方排序，這樣之後在做加法跟減法的時候會比較好處理。
+在功能上，我有做到加法、減法、乘法，還有把數值帶進去算結果。像加減法就是把兩個多項式一項一項對齊來算，乘法就是每一項互乘再整理。
+另外有一個我覺得比較特別的是 Available List，就是把用不到的節點先存起來，下次要用就直接拿，不用一直 new 跟 delete，這樣效能會比較好。
 
 ### 解題策略
+先把「Linked List」本身做好，因為後面多項式全部都會用到它。如果串列本身不穩，後面一定會很亂。所以我先把基本的節點、串接方式，還有插入功能都先寫好。
+接著我有做 Iterator，因為如果每次都要用指標慢慢走會很麻煩，所以我讓它可以像 for 迴圈一樣用，這樣在寫多項式運算的時候會簡單很多，也比較不容易出錯。
+再來是多項式的部分，我的做法是讓每一項都照「指數大小」排好，這樣在做加法跟減法的時候，就可以一項一項對著處理，不用一直重新排序。
 
-1. 使用Chainlterator:已更加簡單的方式編利串列，讓串列也可以像平常用int的方法是用for迴圈。
-   
-    *it 是回傳 element 這一個屬性，可以當作 (coef, exp)。
-  
-   it->element->exp 透過 -> 會被簡化為 it->exp。
-   
-   it++ 可以當作平常 for 迴圈裡面 i++ 的概念。
-   
-   ++it 跟上面的意思一樣。
-   
-   != 和 == 就是在檢查 A 節點是否等於或不等於 B 節點。
-   
-   node_A - node_B 是在計算兩個節點的間距為多少。
-   
-2.Available List
-主要是幫助使用者存放節點。
-
-讓你先把要刪除的節點存放到 Available List 裡，如果之後要用新節點的話，就不需要再生成額外的節點出來，直接使用 Available List 裡的即可。
-
-getBack 就是把整串的 ChainNode 回收到 AvailableItem 裡。
-
-isEmpty 用來檢查 Available List 是否為空。
-
-getNode 就是把 Available List 裡面的一個節點拿到外面的 poly 串列裡。
-  
 ## 程式實作
 
 以下為主要程式碼：
-
 ```cpp
-
 #include <iomanip>
 #include <cmath>
 #include <stdexcept>
 #include <iostream>
 using namespace std;
+
 template <class T>
 class ChainNode {
 public:
@@ -71,39 +42,36 @@ public:
         if (!current) throw runtime_error("Iterator dereference nullptr");
         return current->element;
     }
+
     T* operator->() const {
         if (!current) throw runtime_error("Iterator arrow on nullptr");
         return &(current->element);
     }
 
-    ChainIterator& operator++() { 
+    ChainIterator& operator++() {
         if (current) current = current->link;
         return *this;
     }
-    ChainIterator operator++(int) { 
+
+    ChainIterator operator++(int) {
         ChainIterator tmp(*this);
         ++(*this);
         return tmp;
     }
 
-    bool operator==(const ChainIterator& rhs) const { return current == rhs.current; }
-    bool operator!=(const ChainIterator& rhs) const { return current != rhs.current; }
+    bool operator==(const ChainIterator& rhs) const {
+        return current == rhs.current;
+    }
 
-    int operator-(const ChainIterator& rhs) const {
-      
-        int dist = 0;
-        Node* p = rhs.current;
-        while (p && p != current) {
-            p = p->link;
-            dist++;
-        }
-        return (p == current) ? dist : 0;
+    bool operator!=(const ChainIterator& rhs) const {
+        return current != rhs.current;
     }
 
 private:
     Node* current{ nullptr };
 
-    template<class U> friend class Chain;
+    template<class U>
+    friend class Chain;
 };
 
 template <class T>
@@ -129,7 +97,9 @@ public:
         return *this;
     }
 
-    ~Chain() { Release(); }
+    ~Chain() {
+        Release();
+    }
 
     bool IsEmpty() const { return size == 0; }
     int Length() const { return size; }
@@ -151,7 +121,7 @@ public:
     void Insert(int k, const T& x) {
         if (k < -1 || k >= size) throw out_of_range("Chain::Insert index out of range");
 
-        if (k == -1) { // push front
+        if (k == -1) {
             Node* n = new Node(x, first);
             first = n;
             if (!last) last = n;
@@ -172,8 +142,7 @@ public:
         Node* n = new Node(x, nullptr);
         if (!first) {
             first = last = n;
-        }
-        else {
+        } else {
             last->link = n;
             last = n;
         }
@@ -186,7 +155,6 @@ private:
     int size;
 };
 
- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 class Polynomial {
 public:
     struct Term {
@@ -198,11 +166,14 @@ private:
     using Node = ChainNode<Term>;
     Node* header{ nullptr };
     static Node* avail;
-    static bool AvailIsEmpty() { return avail == nullptr; }
+
+    static bool AvailIsEmpty() {
+        return avail == nullptr;
+    }
+
     static Node* GetNode() {
-        if (AvailIsEmpty()) {
-            return new Node();
-        }
+        if (AvailIsEmpty()) return new Node();
+
         Node* p = avail;
         avail = avail->link;
         p->link = nullptr;
@@ -225,10 +196,14 @@ private:
 
     void InitEmpty() {
         header = GetNode();
-        header->element = Term{ 0, -1 }; 
-        header->link = header;        
+        header->element = Term{0, -1};
+        header->link = header;
     }
-    static bool IsZeroCoef(long long c) { return c == 0; }
+
+    static bool IsZeroCoef(long long c) {
+        return c == 0;
+    }
+
     void NewTerm(long long c, int e) {
         if (IsZeroCoef(c)) return;
 
@@ -243,7 +218,6 @@ private:
         if (cur != header && cur->element.exp == e) {
             cur->element.coef += c;
             if (IsZeroCoef(cur->element.coef)) {
-                
                 prev->link = cur->link;
                 ReturnNode(cur);
             }
@@ -260,7 +234,8 @@ private:
     void ClearTermsToAvail() {
         if (!header) return;
         Node* cur = header->link;
-        if (cur == header) return; 
+        if (cur == header) return;
+
         header->link = header;
         Node* firstLinear = nullptr;
         Node* tailLinear = nullptr;
@@ -269,8 +244,12 @@ private:
         while (p != header) {
             Node* nxt = p->link;
             p->link = nullptr;
-            if (!firstLinear) firstLinear = tailLinear = p;
-            else { tailLinear->link = p; tailLinear = p; }
+            if (!firstLinear) {
+                firstLinear = tailLinear = p;
+            } else {
+                tailLinear->link = p;
+                tailLinear = p;
+            }
             p = nxt;
         }
 
@@ -278,7 +257,9 @@ private:
     }
 
 public:
-    Polynomial() { InitEmpty(); }
+    Polynomial() {
+        InitEmpty();
+    }
 
     Polynomial(const Polynomial& other) {
         InitEmpty();
@@ -289,8 +270,8 @@ public:
 
     Polynomial& operator=(const Polynomial& other) {
         if (this == &other) return *this;
+
         ClearTermsToAvail();
-        // reset to empty circular
         header->link = header;
 
         for (Node* p = other.header->link; p != other.header; p = p->link) {
@@ -305,22 +286,6 @@ public:
         header = nullptr;
     }
 
-    class iterator {
-    public:
-        iterator(Node* p = nullptr, Node* h = nullptr) : cur(p), head(h) {}
-        Term& operator*() const { return cur->element; }
-        Term* operator->() const { return &(cur->element); }
-        iterator& operator++() { cur = cur->link; return *this; }
-        bool operator!=(const iterator& rhs) const { return cur != rhs.cur; }
-    private:
-        Node* cur;
-        Node* head;
-    };
-
-    iterator begin() const { return iterator(header->link, header); }
-    iterator end() const { return iterator(header, header); }
-
-    // Evaluate: substitute X
     double Evaluate(double x) const {
         double sum = 0.0;
         for (Node* p = header->link; p != header; p = p->link) {
@@ -362,14 +327,13 @@ public:
 
             if (!first) {
                 out << (c >= 0 ? " + " : " - ");
-            }
-            else {
+            } else {
                 if (c < 0) out << "-";
             }
 
             long long absC = llabs(c);
-
             bool needCoef = (absC != 1) || (e == 0);
+
             if (needCoef) out << absC;
 
             if (e != 0) {
@@ -380,7 +344,7 @@ public:
             first = false;
         }
 
-        if (first) out << "0"; 
+        if (first) out << "0";
         return out;
     }
 
@@ -396,25 +360,26 @@ public:
             if (p->element.exp > q->element.exp) {
                 C.NewTerm(p->element.coef, p->element.exp);
                 p = p->link;
-            }
-            else if (p->element.exp < q->element.exp) {
+            } else if (p->element.exp < q->element.exp) {
                 C.NewTerm(q->element.coef, q->element.exp);
                 q = q->link;
-            }
-            else {
+            } else {
                 C.NewTerm(p->element.coef + q->element.coef, p->element.exp);
                 p = p->link;
                 q = q->link;
             }
         }
+
         while (p != A.header) {
             C.NewTerm(p->element.coef, p->element.exp);
             p = p->link;
         }
+
         while (q != B.header) {
             C.NewTerm(q->element.coef, q->element.exp);
             q = q->link;
         }
+
         return C;
     }
 
@@ -430,25 +395,26 @@ public:
             if (p->element.exp > q->element.exp) {
                 C.NewTerm(p->element.coef, p->element.exp);
                 p = p->link;
-            }
-            else if (p->element.exp < q->element.exp) {
+            } else if (p->element.exp < q->element.exp) {
                 C.NewTerm(-q->element.coef, q->element.exp);
                 q = q->link;
-            }
-            else {
+            } else {
                 C.NewTerm(p->element.coef - q->element.coef, p->element.exp);
                 p = p->link;
                 q = q->link;
             }
         }
+
         while (p != A.header) {
             C.NewTerm(p->element.coef, p->element.exp);
             p = p->link;
         }
+
         while (q != B.header) {
             C.NewTerm(-q->element.coef, q->element.exp);
             q = q->link;
         }
+
         return C;
     }
 
@@ -464,23 +430,24 @@ public:
                 C.NewTerm(c, e);
             }
         }
+
         return C;
     }
 };
 
 Polynomial::Node* Polynomial::avail = nullptr;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////////////// 
-#ifdef DEMO_HW3
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
     Polynomial A, B;
-    cout << "Enter A (n c1 e1 ...): ";
+    double x;
+
+    cout << "請輸入多項式 A（格式：項數 係數 指數 ...）: ";
     cin >> A;
-    cout << "Enter B (n c1 e1 ...): ";
+
+    cout << "請輸入多項式 B（格式：項數 係數 指數 ...）: ";
     cin >> B;
 
     cout << "A = " << A << "\n";
@@ -489,81 +456,42 @@ int main() {
     cout << "A - B = " << (A - B) << "\n";
     cout << "A * B = " << (A * B) << "\n";
 
-    double x;
-    cout << "Enter x to evaluate A(x): ";
+    cout << "請輸入 x 的值：";
     cin >> x;
     cout << "A(" << x << ") = " << fixed << setprecision(6) << A.Evaluate(x) << "\n";
 
-    Chain<int> xchain;
-    xchain.PushBack(10);
-    xchain.PushBack(20);
-    Chain<int>::iterator xHere = xchain.Begin();
-    Chain<int>::iterator xEnd = xchain.End();
-    cout << "Chain<int>: ";
-    for (; xHere != xEnd; ++xHere) cout << *xHere << " ";
-    cout << "\n";
+    return 0;
 }
-#endif
+
 ```
 
-## 效能分析
+## 📊 效能分析（簡單理解版）
 
-| 功能  | 時間複雜度 | 空間複雜度  |
-|------------------|-----------------------------|-------------------------------|
-| `Chain::PushBack` | O(1) | O(1) |
-| `Chain::Insert(k)` | O(k)，最壞 O(n) | O(1) |
-| `Chain::Release` / 解構子 | O(n) | O(1) |
-| `Polynomial::NewTerm` | O(t) | O(1) |
-| `operator>>`（建立 N 項多項式） | O(N²) | O(N) |
-| `Polynomial::Evaluate` | O(m) | O(1) |
-| `operator+ (A + B)` | O((m + n)²) | O(m + n) |
-| `operator- (A - B)` | O((m + n)²) | O(m + n) |
-| `operator* (A * B)` | O((m · n)²) | O(m · n) |
+| 功能       | 時間複雜度 | 意思    |
+| -------- | ----- | ----- |
+| PushBack | O(1)  | 很快    |
+| Insert   | O(n)  | 要找位置  |
+| Evaluate | O(n)  | 每項都算  |
+| 加減法      | O(n²) | 需要比較項 |
+| 乘法       | O(n²) | 每項都要乘 |
 
 
-## 測試與驗證
 
-### 測試案例
+## 測試結果
 
-| 測試案例 | 輸入內容 | 預期輸出 | 實際輸出 |
-|---------|---------|---------|---------|
-| 測試一 | `0` | `0` | `0` |
-| 測試二 | `1 5 2` | `5X^2` | `5X^2` |
-| 測試三 | `3 5 2 3 1 8 0` | `5X^2 + 3X + 8` | `5X^2 + 3X + 8` |
-| 測試四 | `2 3 2 -3 2` | `0` | `0` |
-| 測試五 | 非法輸入 | 異常拋出 | 異常拋出 |
+| 測試     | 結果           |
+| ------ | ------------ |
+| 空多項式   | 正確           |
+| 單一項    | 正確           |
+| 多項式    | 正確           |
+| 相消（變0） | 正確           |
+| 錯誤輸入   | 有丟 exception |
+
+###結論
+這次作業讓我比較了解 Linked List 在實際應用上的用法，尤其是用來做多項式的時候，可以很方便地做插入和刪除，不用像陣列一樣一直移動資料。
+
+在實作過程中，我覺得最有收穫的是學到怎麼把資料結構設計好，像是用 iterator 讓操作變簡單，還有用 Available List 來減少一直 new 和 delete，讓程式跑得更順。
+
+另外在做多項式加減乘的時候，也讓我更清楚怎麼把問題拆開，一步一步處理，而不是一開始就想一次寫完。
 
 
-### 編譯與執行指令
-
-
-```bash
-g++ --std=c++17 -o polynomial polynomial.cpp
-./polynomial
-A = 5X^2 + 3X + 8
-B = 2X^2 - X
-A + B = 7X^2 + 2X + 8
-A - B = 3X^2 + 4X + 8
-A * B = 10X^4 + X^3 + 13X^2 - 8X
-```
-
-### 結論
-
-1.鏈結串列不是萬能
- 插入方便，但一直從頭找會很慢
-
-2.設計比語法重要
- 同一個功能，NewTerm 怎麼寫，效能可以差到好幾倍
- 
-3.Available List 是效能優化的概念
-不是每次 new/delete，而是回收再利用
-
-## 申論及開發報告
-
-原本以為就是寫多項式而已，但深入題目的時候才發現是在教會我們資料結構怎麼設計比較好。
-
-用有 header 的環狀鏈結串列，是因為這樣在插入、刪除節點時比較不用一直處理特殊情況，像是第一個節點或空串列，整個邏輯會比較乾淨。要用到串列的時候，只要走到 header 就知道結束，是還蠻容易偵錯的。
-
-用 Available List 來管理節點，是因為如果每次刪一項就直接 delete，之後又 new，其實會很浪費效能。把不要的節點先收起來，下次再拿來用，會跑得比較快。
-
-在實作運算子的部分，不用一直呼叫函式，程式看起來不會一坨完全全部搞在一起。
