@@ -1,9 +1,4 @@
 
-#include <iomanip>
-#include <cmath>
-#include <stdexcept>
-#include <iostream>
-using namespace std;
 template <class T>
 class ChainNode {
 public:
@@ -25,39 +20,36 @@ public:
         if (!current) throw runtime_error("Iterator dereference nullptr");
         return current->element;
     }
+
     T* operator->() const {
         if (!current) throw runtime_error("Iterator arrow on nullptr");
         return &(current->element);
     }
 
-    ChainIterator& operator++() { 
+    ChainIterator& operator++() {
         if (current) current = current->link;
         return *this;
     }
-    ChainIterator operator++(int) { 
+
+    ChainIterator operator++(int) {
         ChainIterator tmp(*this);
         ++(*this);
         return tmp;
     }
 
-    bool operator==(const ChainIterator& rhs) const { return current == rhs.current; }
-    bool operator!=(const ChainIterator& rhs) const { return current != rhs.current; }
+    bool operator==(const ChainIterator& rhs) const {
+        return current == rhs.current;
+    }
 
-    int operator-(const ChainIterator& rhs) const {
-      
-        int dist = 0;
-        Node* p = rhs.current;
-        while (p && p != current) {
-            p = p->link;
-            dist++;
-        }
-        return (p == current) ? dist : 0;
+    bool operator!=(const ChainIterator& rhs) const {
+        return current != rhs.current;
     }
 
 private:
     Node* current{ nullptr };
 
-    template<class U> friend class Chain;
+    template<class U>
+    friend class Chain;
 };
 
 template <class T>
@@ -83,7 +75,9 @@ public:
         return *this;
     }
 
-    ~Chain() { Release(); }
+    ~Chain() {
+        Release();
+    }
 
     bool IsEmpty() const { return size == 0; }
     int Length() const { return size; }
@@ -105,7 +99,7 @@ public:
     void Insert(int k, const T& x) {
         if (k < -1 || k >= size) throw out_of_range("Chain::Insert index out of range");
 
-        if (k == -1) { // push front
+        if (k == -1) {
             Node* n = new Node(x, first);
             first = n;
             if (!last) last = n;
@@ -126,8 +120,7 @@ public:
         Node* n = new Node(x, nullptr);
         if (!first) {
             first = last = n;
-        }
-        else {
+        } else {
             last->link = n;
             last = n;
         }
@@ -140,7 +133,6 @@ private:
     int size;
 };
 
- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 class Polynomial {
 public:
     struct Term {
@@ -152,11 +144,14 @@ private:
     using Node = ChainNode<Term>;
     Node* header{ nullptr };
     static Node* avail;
-    static bool AvailIsEmpty() { return avail == nullptr; }
+
+    static bool AvailIsEmpty() {
+        return avail == nullptr;
+    }
+
     static Node* GetNode() {
-        if (AvailIsEmpty()) {
-            return new Node();
-        }
+        if (AvailIsEmpty()) return new Node();
+
         Node* p = avail;
         avail = avail->link;
         p->link = nullptr;
@@ -179,10 +174,14 @@ private:
 
     void InitEmpty() {
         header = GetNode();
-        header->element = Term{ 0, -1 }; 
-        header->link = header;        
+        header->element = Term{0, -1};
+        header->link = header;
     }
-    static bool IsZeroCoef(long long c) { return c == 0; }
+
+    static bool IsZeroCoef(long long c) {
+        return c == 0;
+    }
+
     void NewTerm(long long c, int e) {
         if (IsZeroCoef(c)) return;
 
@@ -197,7 +196,6 @@ private:
         if (cur != header && cur->element.exp == e) {
             cur->element.coef += c;
             if (IsZeroCoef(cur->element.coef)) {
-                
                 prev->link = cur->link;
                 ReturnNode(cur);
             }
@@ -214,7 +212,8 @@ private:
     void ClearTermsToAvail() {
         if (!header) return;
         Node* cur = header->link;
-        if (cur == header) return; 
+        if (cur == header) return;
+
         header->link = header;
         Node* firstLinear = nullptr;
         Node* tailLinear = nullptr;
@@ -223,8 +222,12 @@ private:
         while (p != header) {
             Node* nxt = p->link;
             p->link = nullptr;
-            if (!firstLinear) firstLinear = tailLinear = p;
-            else { tailLinear->link = p; tailLinear = p; }
+            if (!firstLinear) {
+                firstLinear = tailLinear = p;
+            } else {
+                tailLinear->link = p;
+                tailLinear = p;
+            }
             p = nxt;
         }
 
@@ -232,7 +235,9 @@ private:
     }
 
 public:
-    Polynomial() { InitEmpty(); }
+    Polynomial() {
+        InitEmpty();
+    }
 
     Polynomial(const Polynomial& other) {
         InitEmpty();
@@ -243,8 +248,8 @@ public:
 
     Polynomial& operator=(const Polynomial& other) {
         if (this == &other) return *this;
+
         ClearTermsToAvail();
-        // reset to empty circular
         header->link = header;
 
         for (Node* p = other.header->link; p != other.header; p = p->link) {
@@ -259,22 +264,6 @@ public:
         header = nullptr;
     }
 
-    class iterator {
-    public:
-        iterator(Node* p = nullptr, Node* h = nullptr) : cur(p), head(h) {}
-        Term& operator*() const { return cur->element; }
-        Term* operator->() const { return &(cur->element); }
-        iterator& operator++() { cur = cur->link; return *this; }
-        bool operator!=(const iterator& rhs) const { return cur != rhs.cur; }
-    private:
-        Node* cur;
-        Node* head;
-    };
-
-    iterator begin() const { return iterator(header->link, header); }
-    iterator end() const { return iterator(header, header); }
-
-    // Evaluate: substitute X
     double Evaluate(double x) const {
         double sum = 0.0;
         for (Node* p = header->link; p != header; p = p->link) {
@@ -316,14 +305,13 @@ public:
 
             if (!first) {
                 out << (c >= 0 ? " + " : " - ");
-            }
-            else {
+            } else {
                 if (c < 0) out << "-";
             }
 
             long long absC = llabs(c);
-
             bool needCoef = (absC != 1) || (e == 0);
+
             if (needCoef) out << absC;
 
             if (e != 0) {
@@ -334,7 +322,7 @@ public:
             first = false;
         }
 
-        if (first) out << "0"; 
+        if (first) out << "0";
         return out;
     }
 
@@ -350,25 +338,26 @@ public:
             if (p->element.exp > q->element.exp) {
                 C.NewTerm(p->element.coef, p->element.exp);
                 p = p->link;
-            }
-            else if (p->element.exp < q->element.exp) {
+            } else if (p->element.exp < q->element.exp) {
                 C.NewTerm(q->element.coef, q->element.exp);
                 q = q->link;
-            }
-            else {
+            } else {
                 C.NewTerm(p->element.coef + q->element.coef, p->element.exp);
                 p = p->link;
                 q = q->link;
             }
         }
+
         while (p != A.header) {
             C.NewTerm(p->element.coef, p->element.exp);
             p = p->link;
         }
+
         while (q != B.header) {
             C.NewTerm(q->element.coef, q->element.exp);
             q = q->link;
         }
+
         return C;
     }
 
@@ -384,25 +373,26 @@ public:
             if (p->element.exp > q->element.exp) {
                 C.NewTerm(p->element.coef, p->element.exp);
                 p = p->link;
-            }
-            else if (p->element.exp < q->element.exp) {
+            } else if (p->element.exp < q->element.exp) {
                 C.NewTerm(-q->element.coef, q->element.exp);
                 q = q->link;
-            }
-            else {
+            } else {
                 C.NewTerm(p->element.coef - q->element.coef, p->element.exp);
                 p = p->link;
                 q = q->link;
             }
         }
+
         while (p != A.header) {
             C.NewTerm(p->element.coef, p->element.exp);
             p = p->link;
         }
+
         while (q != B.header) {
             C.NewTerm(-q->element.coef, q->element.exp);
             q = q->link;
         }
+
         return C;
     }
 
@@ -418,23 +408,24 @@ public:
                 C.NewTerm(c, e);
             }
         }
+
         return C;
     }
 };
 
 Polynomial::Node* Polynomial::avail = nullptr;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////////////// 
-#ifdef DEMO_HW3
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
     Polynomial A, B;
-    cout << "Enter A (n c1 e1 ...): ";
+    double x;
+
+    cout << "請輸入多項式 A（格式：項數 係數 指數 ...）: ";
     cin >> A;
-    cout << "Enter B (n c1 e1 ...): ";
+
+    cout << "請輸入多項式 B（格式：項數 係數 指數 ...）: ";
     cin >> B;
 
     cout << "A = " << A << "\n";
@@ -443,18 +434,9 @@ int main() {
     cout << "A - B = " << (A - B) << "\n";
     cout << "A * B = " << (A * B) << "\n";
 
-    double x;
-    cout << "Enter x to evaluate A(x): ";
+    cout << "請輸入 x 的值：";
     cin >> x;
     cout << "A(" << x << ") = " << fixed << setprecision(6) << A.Evaluate(x) << "\n";
 
-    Chain<int> xchain;
-    xchain.PushBack(10);
-    xchain.PushBack(20);
-    Chain<int>::iterator xHere = xchain.Begin();
-    Chain<int>::iterator xEnd = xchain.End();
-    cout << "Chain<int>: ";
-    for (; xHere != xEnd; ++xHere) cout << *xHere << " ";
-    cout << "\n";
+    return 0;
 }
-#endif
